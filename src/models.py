@@ -27,7 +27,7 @@ def create_model():
   feature_b = feature_extractor(input_b)
   delta = Lambda(lambda x: x[0] - x[1], output_shape = lambda s: s[0])([feature_a, feature_b])
 
-  hidden1 = Dropout()(Dense(128, activation = "tanh")(delta))
+  hidden1 = Dropout(0.5)(Dense(128, activation = "tanh")(delta))
   hidden2 = Dense(128, activation = "tanh")(hidden1)
   output = Dense(2, activation = "softmax")(hidden2)
 
