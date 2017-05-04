@@ -3,7 +3,7 @@ import os, argparse
 from models import create_model
 from data import load_data
 
-from keras.optimizers import Adam
+from keras.optimizers import SGD
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -17,5 +17,5 @@ if __name__ == "__main__":
   model = create_model()
   print model.summary()
 
-  model.compile(optimizer = Adam(), loss = "binary_crossentropy", metrics = ["accuracy"])
+  model.compile(optimizer = SGD(lr = 0.001, momentum = 0.9), loss = "binary_crossentropy", metrics = ["accuracy"])
   model.fit(X["train"], Y["train"], validation_data = [X["valid"], Y["valid"]], batch_size = 4, nb_epoch = 128, verbose = 1)
