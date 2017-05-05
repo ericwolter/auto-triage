@@ -14,7 +14,15 @@ def load_data():
           continue
         for i, x in enumerate([a, b]):
           image = cv2.imread("../data/images/{:06d}-{:02d}.JPG".format(prefix, x))
-          image = cv2.resize(image, (224, 224)).astype(np.float32)
+          width, height = image.shape[:2]
+          if width < height:
+            width = int(224. * width / height)
+            height = 224
+          else:
+            height = int(224. * height / width)
+            width = 224
+          image = cv2.resize(image, (height, width)).astype(np.float32)
+          image = np.pad(image, ((0, 224 - width), (0, 224 - height), (0, 0)), mode = "constant", constant_values = 0)
           X[set][i].append(image)
         if score < 0.5:
           Y[set].append([1, 0])
