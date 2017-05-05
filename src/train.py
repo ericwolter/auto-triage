@@ -4,6 +4,7 @@ from models import create_model
 from data import load_data
 
 from keras.optimizers import SGD
+from keras.callbacks import TensorBoard
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -21,4 +22,4 @@ if __name__ == "__main__":
   print model.summary()
 
   model.compile(optimizer = SGD(lr = 0.001, momentum = 0.9), loss = "binary_crossentropy", metrics = ["accuracy"])
-  model.fit(X["train"], Y["train"], validation_data = [X["valid"], Y["valid"]], nb_epoch = FLAGS.epochs, batch_size = FLAGS.batch, verbose = 1)
+  model.fit(X["train"], Y["train"], validation_data = [X["valid"], Y["valid"]], nb_epoch = FLAGS.epochs, batch_size = FLAGS.batch, callbacks = [TensorBoard(log_dir = "./logs")], verbose = 1)
