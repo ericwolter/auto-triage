@@ -1,4 +1,3 @@
-from keras.applications.vgg16 import VGG16
 from keras.layers import Input, Lambda, Dense, Dropout
 from keras.regularizers import l2
 from keras.models import Model
@@ -15,11 +14,22 @@ def add_regularizer(model, kernel_regularizer = l2(), bias_regularizer = l2()):
     if hasattr(layer, "bias_regularizer"):
       layer.bias_regularizer = bias_regularizer
 
-def create_model():
+def create_model(FLAGS):
   input_a = Input(shape = (224, 224, 3))
   input_b = Input(shape = (224, 224, 3))
 
-  feature_extractor = VGG16()
+  if FLAGS.model == "vgg16":
+    from keras.applications.vgg16 import VGG16
+    feature_extractor = VGG16()
+  elif FLAGS.model == "vgg19":
+    from keras.applications.vgg19 import VGG19
+    feature_extractor = VGG19()
+  elif FLAGS.model == "resnet50":
+    from keras.applications.resnet50 import ResNet50
+    feature_extractor = ResNet50()
+  else:
+    raise NotImplementedError
+
   remove_last_layer(feature_extractor)
   add_regularizer(feature_extractor)
 
