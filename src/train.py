@@ -12,14 +12,15 @@ if __name__ == "__main__":
   parser.add_argument("--model", dest = "model", default = "vgg16")
   parser.add_argument("--epochs", dest = "epochs", default = 16, type = int)
   parser.add_argument("--batch", dest = "batch", default = 4, type = int)
+  parser.add_argument("--reset", dest = "reset", action = "store_true")
 
   FLAGS = parser.parse_args()
   os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
   os.environ["CUDA_VISIBLE_DEVICES"] = FLAGS.gpu
 
-  X, Y = load_data()
+  X, Y = load_data(FLAGS)
   model = create_model(FLAGS)
   print model.summary()
 
   model.compile(optimizer = SGD(lr = 0.001, momentum = 0.9), loss = "binary_crossentropy", metrics = ["accuracy"])
-  model.fit(X["train"], Y["train"], validation_data = [X["valid"], Y["valid"]], nb_epoch = FLAGS.epochs, batch_size = FLAGS.batch, callbacks = [TensorBoard(log_dir = "./logs")], verbose = 1)
+  model.fit(X["train"], Y["train"], validation_data = [X["valid"], Y["valid"]], epochs = FLAGS.epochs, batch_size = FLAGS.batch, callbacks = [TensorBoard(log_dir = "./logs")], verbose = 1)
