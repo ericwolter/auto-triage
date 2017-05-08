@@ -23,7 +23,7 @@ def load_data():
             width = 224
           image = cv2.resize(image, (height, width)).astype(np.float32)
           image = np.pad(image, ((0, 224 - width), (0, 224 - height), (0, 0)), mode = "constant", constant_values = 0)
-          X[set][i].append(image)
+          X[set][i].append(image / 255.)
         if score < 0.5:
           Y[set].append([1, 0])
         else:
