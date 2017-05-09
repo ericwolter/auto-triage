@@ -4,7 +4,7 @@ import numpy as np
 def load_data(FLAGS):
   X, Y = {}, {}
   for set in ["train", "valid"]:
-    if os.path.exists("../data/" + set + ".npz") and not FLAGS.reset:
+    if os.path.exists("../data/" + set + ".npz"):
       files = np.load(open("../data/" + set + ".npz", "r"))
       X[set], Y[set] = [files["X0"], files["X1"]], files["Y"]
     else:
@@ -14,8 +14,6 @@ def load_data(FLAGS):
           elements = line.strip().split()
           prefix, a, b = map(int, elements[:3])
           score = float(elements[3])
-          if score >= 0.3 and score <= 0.7:
-            continue
           for i, x in enumerate([a, b]):
             image = cv2.imread("../data/images/{:06d}-{:02d}.JPG".format(prefix, x))
             width, height = image.shape[:2]
