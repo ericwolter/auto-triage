@@ -33,5 +33,5 @@ if __name__ == "__main__":
   model.compile(optimizer, loss = "binary_crossentropy", metrics = ["accuracy"])
 
   for set in ["train", "valid"]:
-    loss, acc = model.evaluate(X[set], Y[set], batch_size = FLAGS.batch, verbose = 1)
-    print set, "acc:", acc
+    loss, accuracy = model.evaluate(X[set], Y[set], batch_size = FLAGS.batch, verbose = 1)
+    print set, "accuracy:", accuracy
