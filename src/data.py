@@ -14,6 +14,8 @@ def load_data(FLAGS):
           elements = line.strip().split()
           prefix, a, b = map(int, elements[:3])
           score = float(elements[3])
+          if set == "valid" and score >= 0.3 and score <= 0.7:
+            continue
           for i, x in enumerate([a, b]):
             image = cv2.imread("../data/images/{:06d}-{:02d}.JPG".format(prefix, x))
             width, height = image.shape[:2]
