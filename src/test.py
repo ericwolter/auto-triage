@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
   X, Y = load_data(FLAGS)
   model = create_model(FLAGS)
-  print model.summary()
+  model.summary()
 
   model.load_weights("../exp/" + FLAGS.exp + "/weights.hdf5")
 
