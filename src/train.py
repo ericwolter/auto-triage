@@ -35,7 +35,7 @@ if __name__ == "__main__":
   os.system("mkdir -p ../exp/" + FLAGS.exp + "/")
 
   callbacks = [
-    ModelCheckpoint("../exp/" + FLAGS.exp + "/model-{val_acc:.2f}.hdf5", monitor = "val_acc", verbose = 1, save_best_only = True),
+    ModelCheckpoint("../exp/" + FLAGS.exp + "/weights-{val_acc:.2f}.hdf5", monitor = "val_acc", verbose = 1, save_best_only = True, save_weights_only = True),
     TensorBoard(log_dir = "../exp/" + FLAGS.exp + "/logs/"),
     ReduceLROnPlateau(monitor = "val_acc", factor = 0.5, patience = 2, verbose = 1)
   ]

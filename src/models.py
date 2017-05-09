@@ -2,11 +2,6 @@ from keras.layers import Input, Lambda, Dense, Dropout
 from keras.regularizers import l2
 from keras.models import Model
 
-def remove_last_layer(model):
-  model.layers.pop()
-  model.outputs = [model.layers[-1].output]
-  model.layers[-1].outbound_nodes = []
-
 def add_regularizer(model, kernel_regularizer = l2(), bias_regularizer = l2()):
   for layer in model.layers:
     if hasattr(layer, "kernel_regularizer"):
@@ -30,7 +25,7 @@ def create_model(FLAGS):
   else:
     raise NotImplementedError
 
-  remove_last_layer(feature_extractor)
+  feature_extractor.layers.pop()
   add_regularizer(feature_extractor)
 
   feature_a = feature_extractor(input_a)
