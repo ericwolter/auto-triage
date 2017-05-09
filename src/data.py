@@ -32,7 +32,8 @@ def load_data(FLAGS):
             else:
               Y[set].append([0, 1])
             if set == "valid" and score >= 0.3 and score <= 0.7:
-              X[set].pop()
+              X[set][0].pop()
+              X[set][1].pop()
               Y[set].pop()
       X[set][0], X[set][1], Y[set] = map(np.array, [X[set][0], X[set][1], Y[set]])
       np.savez(open("../data/" + set + ".npz", "w"), X0 = X[set][0], X1 = X[set][1], Y = Y[set])
