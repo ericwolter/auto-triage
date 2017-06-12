@@ -1,12 +1,13 @@
-import os, json, argparse
+import os, cv2, json, argparse
+import numpy as np
 
 from models import create_model
-from data import load_data
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--gpu", default = "0")
   parser.add_argument("--exp", default = "default")
+  parser.add_argument("images", nargs = "+")
 
   FLAGS = parser.parse_args()
   os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -33,7 +34,10 @@ if __name__ == "__main__":
   if not hasattr(FLAGS, "regularizer"):
     setattr(FLAGS, "regularizer", "l2")
 
-  X, Y = load_data(FLAGS)
+  for image in FLAGS.images:
+    if not os.path.exists(image):
+      raise Exception("<" + image + "> not found")
+
   model = create_model(FLAGS)
   model.load_weights("../exp/" + FLAGS.exp + "/weights.hdf5")
 
@@ -51,9 +55,24 @@ if __name__ == "__main__":
 
   model.compile(optimizer, loss = "binary_crossentropy", metrics = ["accuracy"])
 
-  results = {}
-  for set in ["train", "valid"]:
-    loss, accuracy = model.evaluate(X[set], Y[set], batch_size = FLAGS.batch, verbose = 1)
-    results[set] = accuracy
-    print set, "accuracy:", accuracy
-  json.dump(results, open("../exp/" + FLAGS.exp + "/results.json", "w"))
+  for a in xrange(len(FLAGS.images)):
+    for b in xrange(a + 1, len(FLAGS.images)):
+      X = []
+      for i, name in enumerate([FLAGS.images[a], FLAGS.images[b]]):
+        image = cv2.imread(name)
+        width, height = image.shape[:2]
+        if width < height:
+          width = int(224. * width / height)
+          height = 224
+        else:
+          height = int(224. * height / width)
+          width = 224
+        image = cv2.resize(image, (height, width)).astype(np.float32)
+        image = np.pad(image, ((0, 224 - width), (0, 224 - height), (0, 0)), mode = "constant", constant_values = 0)
+        image = np.expand_dims(image, axis = 0)
+        X.append(image / 255.)
+      score = model.predict(X, batch_size = 1)[0] * 100
+      if score[0] > score[1]:
+        print "<" + FLAGS.images[a] + ">", "is better than", "<" + FLAGS.images[b] + ">", "with {:.1f}% confidence".format(score[0])
+      else:
+        print "<" + FLAGS.images[b] + ">", "is better than", "<" + FLAGS.images[a] + ">", "with {:.1f}% confidence".format(score[1])
