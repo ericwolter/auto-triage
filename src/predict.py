@@ -34,9 +34,14 @@ if __name__ == "__main__":
   if not hasattr(FLAGS, "regularizer"):
     setattr(FLAGS, "regularizer", "l2")
 
-  for image in FLAGS.images:
-    if not os.path.exists(image):
-      raise Exception("<" + image + "> not found")
+  for name in FLAGS.images:
+    if not os.path.exists(name):
+      raise Exception("<" + name + "> not found")
+    if os.path.isdir(name):
+      for image in os.listdir(name):
+        if image.lower().endswith(".jpg"):
+          FLAGS.images.append(name + "/" + image)
+  FLAGS.images = filter(lambda e : not os.path.isdir(e), FLAGS.images)
 
   model = create_model(FLAGS)
   model.load_weights("../exp/" + FLAGS.exp + "/weights.hdf5")

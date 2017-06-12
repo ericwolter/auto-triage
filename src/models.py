@@ -1,3 +1,5 @@
+import os; os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 from keras.layers import Input, Lambda, Concatenate, Dense, Dropout
 from keras.regularizers import l2
 from keras.models import Model
