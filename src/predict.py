@@ -60,6 +60,7 @@ if __name__ == "__main__":
 
   model.compile(optimizer, loss = "binary_crossentropy", metrics = ["accuracy"])
 
+  scores = [0] * len(FLAGS.images)
   for a in xrange(len(FLAGS.images)):
     for b in xrange(a + 1, len(FLAGS.images)):
       X = []
@@ -76,8 +77,17 @@ if __name__ == "__main__":
         image = np.pad(image, ((0, 224 - width), (0, 224 - height), (0, 0)), mode = "constant", constant_values = 0)
         image = np.expand_dims(image, axis = 0)
         X.append(image / 255.)
+
       score = model.predict(X, batch_size = 1)[0] * 100
+      scores[a] += score[0]
+      scores[b] += score[1]
+
       if score[0] > score[1]:
         print "<" + FLAGS.images[a] + ">", "is better than", "<" + FLAGS.images[b] + ">", "with {:.1f}% confidence".format(score[0])
       else:
         print "<" + FLAGS.images[b] + ">", "is better than", "<" + FLAGS.images[a] + ">", "with {:.1f}% confidence".format(score[1])
+
+  scores = np.array(scores) / (len(FLAGS.images) - 1)
+  indices = np.argsort(-scores)
+  for i in indices.tolist():
+    print "<" + FLAGS.images[i] + ">", "scores", "{:.1f}".format(scores[i])
