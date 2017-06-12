@@ -1,4 +1,4 @@
-from keras.layers import Input, Lambda, Dense, Dropout
+from keras.layers import Input, Lambda, Concatenate, Dense, Dropout
 from keras.regularizers import l2
 from keras.models import Model
 
@@ -19,33 +19,66 @@ def add_regularizer(model, kernel_regularizer = l2(), bias_regularizer = l2()):
     if hasattr(layer, "bias_regularizer"):
       layer.bias_regularizer = bias_regularizer
 
+def feature_extractor(FLAGS, suffix = ""):
+  weights = FLAGS.weights if FLAGS.weights != "random" else None
+
+  if FLAGS.model == "vgg16":
+    from keras.applications.vgg16 import VGG16
+    feature_extractor = VGG16(weights = weights)
+    remove_last_layer(feature_extractor)
+  elif FLAGS.model == "vgg19":
+    from keras.applications.vgg19 import VGG19
+    feature_extractor = VGG19(weights = weights)
+    remove_last_layer(feature_extractor)
+  elif FLAGS.model == "resnet50":
+    from keras.applications.resnet50 import ResNet50
+    feature_extractor = ResNet50(weights = weights)
+    remove_last_layer(feature_extractor)
+  else:
+    raise NotImplementedError
+
+  feature_extractor.name = FLAGS.model + suffix
+
+  if FLAGS.regularizer == "l2":
+    add_regularizer(feature_extractor)
+  elif FLAGS.regularizer != "none":
+    raise NotImplementedError
+  return feature_extractor
+
 def create_model(FLAGS):
   input_a = Input(shape = (224, 224, 3))
   input_b = Input(shape = (224, 224, 3))
 
-  if FLAGS.model == "vgg16":
-    from keras.applications.vgg16 import VGG16
-    feature_extractor = VGG16()
-  elif FLAGS.model == "vgg19":
-    from keras.applications.vgg19 import VGG19
-    feature_extractor = VGG19()
-  elif FLAGS.model == "resnet50":
-    from keras.applications.resnet50 import ResNet50
-    feature_extractor = ResNet50()
+  if FLAGS.siamese == "share":
+    extractor = feature_extractor(FLAGS)
+    feature_a = extractor(input_a)
+    feature_b = extractor(input_b)
+  elif FLAGS.siamese == "separate":
+    extractor_a = feature_extractor(FLAGS, "a")
+    extractor_b = feature_extractor(FLAGS, "b")
+    feature_a = extractor_a(input_a)
+    feature_b = extractor_b(input_b)
   else:
     raise NotImplementedError
 
-  remove_last_layer(feature_extractor)
-  add_regularizer(feature_extractor)
+  if FLAGS.module == "subtract":
+    feature = Lambda(lambda x: x[0] - x[1], output_shape = lambda s: s[0])([feature_a, feature_b])
+  elif FLAGS.module == "bilinear":
+    raise NotImplementedError
+  elif FLAGS.module == "neural":
+    feature = Concatenate()([feature_a, feature_b])
+    feature = Dense(128, activation = FLAGS.activation)(feature)
+  else:
+    raise NotImplementedError
 
-  feature_a = feature_extractor(input_a)
-  feature_b = feature_extractor(input_b)
-  delta = Lambda(lambda x: x[0] - x[1], output_shape = lambda s: s[0])([feature_a, feature_b])
-
-  hidden1 = Dropout(0.5)(Dense(128, activation = "tanh")(delta))
-  hidden2 = Dense(128, activation = "tanh")(hidden1)
+  hidden1 = Dropout(0.5)(Dense(128, activation = FLAGS.activation)(feature))
+  hidden2 = Dense(128, activation = FLAGS.activation)(hidden1)
   output = Dense(2, activation = "softmax")(hidden2)
 
   model = Model([input_a, input_b], output)
-  add_regularizer(model)
+
+  if FLAGS.regularizer == "l2":
+    add_regularizer(model)
+  elif FLAGS.regularizer != "none":
+    raise NotImplementedError
   return model
