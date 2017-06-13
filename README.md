@@ -54,7 +54,7 @@ python evaluate.py <options>
 
 ```
 --exp                experiment identifier (default: default)
---gpu                GPU used for training (default: 0)
+--gpu                GPU used for evaluation (default: 0)
 ```
 
 ### Prediction
@@ -67,7 +67,21 @@ python predict.py <options> <image-list>
 
 ```
 --exp                experiment identifier (default: default)
---gpu                GPU used for training (default: 0)
+--gpu                GPU used for prediction (default: 0)
+```
+
+#### Examples
+
+In order to produce the prediction for `demo scenario 1`, you may use the following command:
+
+```shell
+python predict.py ../data/demos/scenario-1/scenario-1-a.jpg ../data/demos/scenario-1/scenario-1-b.jpg
+```
+
+Also, you may use the following command for short:
+
+```shell
+python predict.py ../data/demos/scenario-1/
 ```
 
 ## License
