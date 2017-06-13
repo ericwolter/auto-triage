@@ -5,8 +5,8 @@ from data import load_data
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--gpu", default = "0")
   parser.add_argument("--exp", default = "default")
+  parser.add_argument("--gpu", default = "0")
 
   FLAGS = parser.parse_args()
   os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"

@@ -26,20 +26,50 @@ src/              # source code
 
 ### Training
 ```bash
-python train.py
+python train.py <options>
+```
+
+#### Options
+
+```
+--exp            experiment identifier (default: default)
+--gpu            GPU used for training (default: 0)
+--epochs         number of training epochs (default: 16)
+--batch          mini-batch size (default: 4)
+--model          model (default: vgg16)                          (vgg16 | vgg19 | resnet50)
+--siamese        weight sharing (default: share)                 (share | separate)
+--weights        transfer learning (default: imagenet)           (imagenet | random)
+--module         feature interaction (default: subtract)         (subtract | bilinear | neural)
+--activation     activation function (default: tanh)             (tanh | relu)
+--regularizer    regularizatiation function (default: l2)        (l2 | none)
 ```
 
 ### Evaluation
 
+```shell
+python evaluate.py <options>
 ```
-python evaluate.py
+
+#### Options
+
+```
+--exp            experiment identifier (default: default)
+--gpu            GPU used for training (default: 0)
 ```
 
 ### Prediction
 
 ```
-python predict.py <image-list>
+python predict.py <options> <image-list>
+```
+
+#### Options
+
+```
+--exp            experiment identifier (default: default)
+--gpu            GPU used for training (default: 0)
 ```
 
 ## License
+
 This project is released under the [open-source MIT license](https://github.com/zhijian-liu/auto-triage/blob/master/LICENSE).
