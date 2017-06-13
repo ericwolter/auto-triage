@@ -24,9 +24,16 @@ src/                 # source code
 * `Keras 2.0+`
 * `TensorFlow 1.0+`
 
+### Preparations
+
+```shell
+cd data/ && sh ./download.sh
+```
+
 ### Training
+
 ```bash
-python train.py <options>
+cd src/ && python train.py <options>
 ```
 
 #### Options
@@ -47,7 +54,7 @@ python train.py <options>
 ### Evaluation
 
 ```shell
-python evaluate.py <options>
+cd src/ && python evaluate.py <options>
 ```
 
 #### Options
@@ -60,7 +67,7 @@ python evaluate.py <options>
 ### Prediction
 
 ```bash
-python predict.py <options> <image-list>
+cd src/ && python predict.py <options> <image-list>
 ```
 
 #### Options
@@ -75,13 +82,13 @@ python predict.py <options> <image-list>
 In order to produce the prediction for `demo scenario 1`, you may use the following command:
 
 ```shell
-python predict.py ../data/demos/scenario-1/scenario-1-a.jpg ../data/demos/scenario-1/scenario-1-b.jpg
+cd src/ && python predict.py ../data/demos/scenario-1/scenario-1-a.jpg ../data/demos/scenario-1/scenario-1-b.jpg
 ```
 
 Also, you may use the following command for short:
 
 ```shell
-python predict.py ../data/demos/scenario-1
+cd src/ && python predict.py ../data/demos/scenario-1
 ```
 
 ## License
