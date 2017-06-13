@@ -81,7 +81,7 @@ python predict.py ../data/demos/scenario-1/scenario-1-a.jpg ../data/demos/scenar
 Also, you may use the following command for short:
 
 ```shell
-python predict.py ../data/demos/scenario-1/
+python predict.py ../data/demos/scenario-1
 ```
 
 ## License
