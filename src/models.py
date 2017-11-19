@@ -1,8 +1,8 @@
 import os; os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-from keras.layers import Input, Lambda, Concatenate, Dense, Dropout
-from keras.regularizers import l2
-from keras.models import Model
+from tensorflow.python.keras.layers import Input, Flatten, Lambda, Concatenate, Dense, Dropout
+from tensorflow.python.keras.regularizers import l2
+from tensorflow.python.keras.models import Model
 
 def remove_last_layer(model):
   model.layers.pop()
@@ -11,8 +11,8 @@ def remove_last_layer(model):
     model.inbound_nodes = []
     model.outbound_nodes = []
   else:
-    model.layers[-1].outbound_nodes = []
     model.outputs = [model.layers[-1].output]
+    #model.layers[-1].outbound_nodes = []
 
 def add_regularizer(model, kernel_regularizer = l2(), bias_regularizer = l2()):
   for layer in model.layers:
@@ -25,26 +25,32 @@ def feature_extractor(FLAGS, suffix = ""):
   weights = FLAGS.weights if FLAGS.weights != "random" else None
 
   if FLAGS.model == "vgg16":
-    from keras.applications.vgg16 import VGG16
+    from tensorflow.python.keras.applications.vgg16 import VGG16
     feature_extractor = VGG16(weights = weights)
     remove_last_layer(feature_extractor)
   elif FLAGS.model == "vgg19":
-    from keras.applications.vgg19 import VGG19
+    from tensorflow.python.keras.applications.vgg19 import VGG19
     feature_extractor = VGG19(weights = weights)
     remove_last_layer(feature_extractor)
   elif FLAGS.model == "resnet50":
-    from keras.applications.resnet50 import ResNet50
+    from tensorflow.python.keras.applications.resnet50 import ResNet50
     feature_extractor = ResNet50(weights = weights)
     remove_last_layer(feature_extractor)
+  elif FLAGS.model == "mobilenet":
+    from tensorflow.python.keras.applications.mobilenet import MobileNet
+    feature_extractor = MobileNet(weights = weights, include_top = False, input_shape=(224, 224, 3), pooling="avg")
   else:
     raise NotImplementedError
 
-  feature_extractor.name = FLAGS.model + suffix
+  #feature_extractor.name = FLAGS.model + suffix
 
-  if FLAGS.regularizer == "l2":
-    add_regularizer(feature_extractor)
-  elif FLAGS.regularizer != "none":
-    raise NotImplementedError
+  #if FLAGS.regularizer == "l2":
+    #add_regularizer(feature_extractor)
+  #elif FLAGS.regularizer != "none":
+    #raise NotImplementedError
+
+  #feature_extractor.trainable = False
+
   return feature_extractor
 
 def create_model(FLAGS):
@@ -64,7 +70,7 @@ def create_model(FLAGS):
     raise NotImplementedError
 
   if FLAGS.module == "subtract":
-    feature = Lambda(lambda x: x[0] - x[1], output_shape = lambda s: s[0])([feature_a, feature_b])
+    feature = Lambda(lambda x: x[0] - x[1])([feature_a, feature_b])
   elif FLAGS.module == "bilinear":
     raise NotImplementedError
   elif FLAGS.module == "neural":
