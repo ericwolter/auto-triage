@@ -21,10 +21,6 @@ def load_image(path, flip=False, random_size=IMAGE_TARGET_SIZE, random_offset_h=
     img = image.load_img(path)
     img = img.resize((IMAGE_FULL_SIZE, IMAGE_FULL_SIZE), resample=PIL.Image.LANCZOS)
 
-    random_size = random.randint(IMAGE_TARGET_SIZE, IMAGE_FULL_SIZE)
-    random_offset_h = random.randint(0, IMAGE_FULL_SIZE - random_size)
-    random_offset_v = random.randint(0, IMAGE_FULL_SIZE - random_size)
-
     window = (random_offset_h, random_offset_v,
               random_size + random_offset_h, random_size + random_offset_v)
     img = img.crop(window)
@@ -41,9 +37,10 @@ def load_image(path, flip=False, random_size=IMAGE_TARGET_SIZE, random_offset_h=
     return x
 
 class TriageSequence(Sequence):
-    def __init__(self, x0_set, x1_set, y_set, batch_size):
+    def __init__(self, x0_set, x1_set, y_set, batch_size, augmented=True):
         self.X0,self.X1,self.y = x0_set,x1_set,y_set
         self.batch_size = batch_size
+        self.augmented = augmented
 
     def __len__(self):
         return len(self.y) // self.batch_size
@@ -54,12 +51,17 @@ class TriageSequence(Sequence):
         batch_y = self.y[idx*self.batch_size:(idx+1)*self.batch_size]
 
         flip = False
-        if np.random.random() < 0.5:
-            flip = True
+        random_size = IMAGE_FULL_SIZE
+        random_offset_h = 0
+        random_offset_v = 0
 
-        random_size = random.randint(IMAGE_TARGET_SIZE, IMAGE_FULL_SIZE)
-        random_offset_h = random.randint(0, IMAGE_FULL_SIZE - random_size)
-        random_offset_v = random.randint(0, IMAGE_FULL_SIZE - random_size)
+        if self.augmented:
+            if np.random.random() < 0.5:
+                flip = True
+
+            random_size = random.randint(IMAGE_TARGET_SIZE, IMAGE_FULL_SIZE)
+            random_offset_h = random.randint(0, IMAGE_FULL_SIZE - random_size)
+            random_offset_v = random.randint(0, IMAGE_FULL_SIZE - random_size)
 
         batch_x0 = np.array([load_image(file_name, flip=flip, random_size=random_size, random_offset_h=random_offset_h, random_offset_v=random_offset_v) for file_name in batch_x0])
         batch_x1 = np.array([load_image(file_name, flip=flip, random_size=random_size, random_offset_h=random_offset_h, random_offset_v=random_offset_v) for file_name in batch_x1])
@@ -100,8 +102,8 @@ if __name__ == "__main__":
   X, Y = load_data(FLAGS)
   #training_sequence = list(zip(X["train"][0], X["train"][1], Y["train"]))
   #validation_sequence = list(zip(X["valid"][0], X["valid"][1], Y["valid"]))
-  training_sequence = TriageSequence(X["train"][0], X["train"][1], Y["train"], FLAGS.batch)
-  validation_sequence = TriageSequence(X["valid"][0], X["valid"][1], Y["valid"], FLAGS.batch)
+  training_sequence = TriageSequence(X["train"][0], X["train"][1], Y["train"], FLAGS.batch, augmented=True)
+  validation_sequence = TriageSequence(X["valid"][0], X["valid"][1], Y["valid"], FLAGS.batch, augmented=False)
 
   print("Creating model...")
   model = create_model(FLAGS)
@@ -133,8 +135,11 @@ if __name__ == "__main__":
   model.compile(optimizer, loss = "binary_crossentropy", metrics = ["accuracy"])
 
   print("Training...")
+  # 12075, 483, 2585
   training_iterations = len(training_sequence)
   validation_iterations = len(validation_sequence)
+  print("Training:", training_iterations * FLAGS.batch)
+  print("Validation:", validation_iterations * FLAGS.batch)
 
   model.fit_generator(training_sequence, training_iterations,
     validation_data = validation_sequence, validation_steps = validation_iterations,
